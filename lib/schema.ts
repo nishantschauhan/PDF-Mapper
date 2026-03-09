@@ -1,18 +1,18 @@
 import { z } from 'zod';
 
-// Define the allowed variable types
-export const VariableTypeEnum = z.enum(['text', 'number', 'date']);
+
+export const VariableTypeEnum = z.enum(['text', 'number', 'date',]);
 export type VariableType = z.infer<typeof VariableTypeEnum>;
 
-// Minimal shape for one variable
+
 export const VariablePlacementSchema = z.object({
-  id: z.string(), // internal unique ID
+  id: z.string(), 
   key: z.string().min(1, "Key cannot be empty"),
   label: z.string().optional(),
   type: VariableTypeEnum,
   page: z.number().int().positive(),
-  x: z.number().min(0).max(100), // Percentage based
-  y: z.number().min(0).max(100), // Percentage based
+  x: z.number().min(0).max(100), 
+  y: z.number().min(0).max(100), 
   width: z.number().optional(),
   height: z.number().optional(),
 });
