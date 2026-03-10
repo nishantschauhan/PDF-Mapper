@@ -10,7 +10,7 @@ export const VariablePlacementSchema = z.object({
   key: z.string().min(1, "Variable can be empty"),
   label: z.string().optional(),
   type: VariableTypeSchema,
-  page: z.number().int().positive(),
+  page: z .number().int().positive(),
   x: z.number().min(0).max(100), 
   y: z.number().min(0).max(100), 
   width: z.number().optional(),
@@ -21,6 +21,7 @@ export type VariablePlacement = z.infer<typeof VariablePlacementSchema>;
 
 export const TemplateExportSchema = z.object({
   documentName: z.string().optional(),
+  coordinateSystem: z.string(),
   variables: z.array(VariablePlacementSchema),
 });
 

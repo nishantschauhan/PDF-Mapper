@@ -97,6 +97,7 @@ export default function Workspace({ file, onNewDocument }: { file: File, onNewDo
     try{
       const payload = {
         documentName: file.name,
+         coordinateSystem: "Origin top-left(0,0). X and Y are percentages of the page width and height.",
         variables: variables,
       };
       
