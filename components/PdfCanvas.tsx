@@ -19,11 +19,10 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
   
  
   const [isEditing, setIsEditing] = useState(false);
-  const [editValue, setEditValue] = useState(variable.key);
-
+  const [widthTracker, setWidthTracker] = useState(variable.key);
   
   useEffect(() => {
-    setEditValue(variable.key);
+    setWidthTracker(variable.key);
   }, [variable.key]);
 
   
@@ -33,23 +32,23 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
     disabled: isEditing, 
   });
 
-  const handleSave = () => {
-    if (editValue.trim() && editValue !== variable.key) {
-      updateVariable(variable.id, { key: editValue.trim() });
-    } else {
-      setEditValue(variable.key); 
+  const handleSave = (finalText: string) => {
+    const val = finalText.trim();
+    if(val && val !== variable.key){
+      updateVariable(variable.id, {key: val});
     }
     setIsEditing(false);
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') handleSave();
-    if (e.key === 'Escape') {
-      setEditValue(variable.key);
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if(e.key === 'Enter'){
+      e.currentTarget.blur();
+    }
+    if(e.key === 'Escape'){
       setIsEditing(false);
     }
-    
-    e.stopPropagation(); 
+    e.stopPropagation();
   };
 
   const style = transform ? {
@@ -90,12 +89,12 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
         <input
           type="text"
           autoFocus
-          value={editValue}
-          onChange={(e) => setEditValue(e.target.value)}
-          onBlur={handleSave} 
+          defaultValue={variable.key}
+          onChange={(e) => setWidthTracker(e.target.value)}
+          onBlur={(e) => handleSave(e.target.value)} 
           onKeyDown={handleKeyDown} 
           className="bg-transparent border-none outline-none text-center text-white"
-          style={{ width: `${Math.max(editValue.length, 3)}ch` }} 
+          style={{ width: `${Math.max(widthTracker.length, 3)}ch` }} 
         />
       ) : (
         variable.key

@@ -67,6 +67,22 @@ export default function Workspace({ file, onNewDocument }: { file: File, onNewDo
         return;
       }
 
+      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'z'){
+        e.preventDefault();
+        if(e.shiftKey){
+          redo();
+        }else{
+          undo();
+        }
+        return;
+      }
+
+      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'y'){
+        e.preventDefault();
+        redo();
+        return;
+      }
+
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedVariableId){
         deleteVariable(selectedVariableId);
         setSelectedVariable(null);
@@ -74,7 +90,7 @@ export default function Workspace({ file, onNewDocument }: { file: File, onNewDo
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedVariableId, deleteVariable, setSelectedVariable]);
+  }, [selectedVariableId, deleteVariable, setSelectedVariable, undo, redo]);
 
   const handleExport = () => {
     // Basic export logic matching our earlier API requirements
