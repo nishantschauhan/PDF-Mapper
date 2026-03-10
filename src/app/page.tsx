@@ -31,29 +31,25 @@ export default function AppRouter() {
   const handleDragEnd = (event: DragEndEvent) => {
     setActiveDragData(null);
     const { active, over } = event;
-
-
     
     if (!over && active.data.current?.type === 'existing-variable') {
       setSelectedVariable(active.data.current.variable.id);
       return;
     }
-
     if (over && over.id.toString().startsWith('pdf-canvas-droppable-page-')) {
       const targetPage = parseInt(over.id.toString().replace('pdf-canvas-droppable-page-', ''), 10);
-      
       const canvasRect = over.rect;
-      const dropX = event.active.rect.current.translated?.left || 0;
-      const dropY = event.active.rect.current.translated?.top || 0;
-
-      
-      const xPercent = Math.max(0, Math.min(((dropX - canvasRect.left) / canvasRect.width) * 100, 100));
-      const yPercent = Math.max(0, Math.min(((dropY - canvasRect.top) / canvasRect.height) * 100, 100));
-
       const activeData = active.data.current;
 
       if (activeData?.type === 'new-variable') {
-        
+        const dropX = event.active.rect.current.translated?.left || 0;
+        const dropY = event.active.rect.current.translated?.top || 0;
+
+        const dropCenterX = dropX + 45; 
+        const dropCenterY = dropY + 14;
+
+        const xPercent = Math.max(0, Math.min(((dropCenterX - canvasRect.left) / canvasRect.width) * 100, 100));
+        const yPercent = Math.max(0, Math.min(((dropCenterY - canvasRect.top) / canvasRect.height) * 100, 100));
         const newId = uuidv4();
         addVariable({
           id: newId,
@@ -64,11 +60,14 @@ export default function AppRouter() {
           y: yPercent,
         });
         setSelectedVariable(null);
-      } 
+      }
       else if (activeData?.type === 'existing-variable') {
-        updateVariable(activeData.variable.id, {
-          x: xPercent,
-          y: yPercent,
+        const deltaXPercent = (event.delta.x / canvasRect.width) * 100;
+        const deltaYPercent = (event.delta.y / canvasRect.height) * 100;
+
+       updateVariable(activeData.variable.id, {
+          x: Math.max(0, Math.min(activeData.variable.x + deltaXPercent, 100)),
+          y: Math.max(0, Math.min(activeData.variable.y + deltaYPercent, 100)),
           page: targetPage,
         });
         setSelectedVariable(null);
