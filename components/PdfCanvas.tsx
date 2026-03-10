@@ -6,7 +6,7 @@ import { usePdfStore } from '../store/usePdfStore';
 import { VariablePlacement } from '../lib/schema'; 
 import React, { useState, useEffect } from 'react';
 import { Type, Hash, Calendar, PenTool,CheckSquare, Signature } from 'lucide-react';
-import { FieldAlreadyExistsError } from 'pdf-lib';
+
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -17,11 +17,13 @@ interface PdfCanvasProps {
 }
 
 function DraggablePlacedVariable({ variable, isSelected }: { variable: VariablePlacement, isSelected: boolean }) {
-  const { setSelectedVariable, updateVariable } = usePdfStore();
+  const {variables, setSelectedVariable, updateVariable } = usePdfStore();
   
  
   const [isEditing, setIsEditing] = useState(false);
   const [widthTracker, setWidthTracker] = useState(variable.key);
+
+  const[error, setError] = useState<string | null>(null);
   
   useEffect(() => {
     setWidthTracker(variable.key);
@@ -34,21 +36,37 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
     disabled: isEditing, 
   });
 
-  const handleSave = (finalText: string) => {
-    const val = finalText.trim();
-    if(val && val !== variable.key){
-      updateVariable(variable.id, {key: val});
-    }
-    setIsEditing(false);
-  };
+  const handleSave = () => {
+    const val = widthTracker.trim();
 
+   if (val === variable.key) {
+      setIsEditing(false);
+      setError(null);
+      return;
+    }
+
+    if (!val) {
+      setError("Key cannot be empty");
+      return;
+    }
+
+    const isDuplicate = variables.some(v => v.key=== val && v.id !== variable.id);
+    if(isDuplicate){
+      setError("Key must be unqiure");
+      return;
+    }
+    updateVariable(variable.id, {key:val});
+    setIsEditing(false);
+    setError(null);
+  };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if(e.key === 'Enter'){
-      e.currentTarget.blur();
+     handleSave();
     }
     if(e.key === 'Escape'){
       setIsEditing(false);
+      setError(null);
     }
     e.stopPropagation();
   };
@@ -82,10 +100,9 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
     <div
       ref={setNodeRef}
       style={{ left: `${variable.x}%`, top: `${variable.y}%`, ...style }}
-      // Only attach drag listeners if we are NOT editing
       {...(!isEditing ? listeners : {})}
       {...attributes}
-      className={`absolute px-2 py-1 border backdrop-blur-md text-xs font-semibold rounded shadow-sm transform -translate-x-1/2 -translate-y-1/2 transition-all ${themeClasses} ${selectedClasses} ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}`}
+      className={`absolute flex items-center gap-1.5 px-2 py-1 border backdrop-blur-md text-xs font-semibold rounded shadow-sm transform -translate-x-1/2 -translate-y-1/2 transition-all ${themeClasses} ${selectedClasses} ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'} `}
       onClick={(e) => {
         e.stopPropagation(); 
         if (!isEditing) setSelectedVariable(variable.id); 
@@ -96,7 +113,6 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
         setIsEditing(true); 
       }}
     >
-
       {!isEditing && <FieldIcon size={12} className="opacity-80 shrink-0" />}
 
       {isEditing ? (
@@ -111,7 +127,13 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
           style={{ width: `${Math.max(widthTracker.length, 3)}ch` }} 
         />
       ) : (
-        variable.key
+        <span className="whitespace-nowrap">{variable.key}</span>
+      )}
+      {error && (
+        <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] px-2 py-1 rounded shadow-xl whitespace-nowrap pointer-events-none z-50">
+          {error}
+          <div className="absolue -top-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-red-600 rotate-45"></div>
+        </div>
       )}
     </div>
   );
