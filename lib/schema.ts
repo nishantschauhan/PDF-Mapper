@@ -1,15 +1,15 @@
 import { z } from 'zod';
 
 
-export const VariableTypeEnum = z.enum(['text', 'number', 'date','signature', 'checkbox']);
-export type VariableType = z.infer<typeof VariableTypeEnum>;
+export const VariableTypeSchema = z.enum(['text', 'number', 'date','signature', 'checkbox']);
+export type VariableType = z.infer<typeof VariableTypeSchema>;
 
 
 export const VariablePlacementSchema = z.object({
   id: z.string(), 
-  key: z.string().min(1, "Key cannot be empty"),
+  key: z.string().min(1, "Variable can be empty"),
   label: z.string().optional(),
-  type: VariableTypeEnum,
+  type: VariableTypeSchema,
   page: z.number().int().positive(),
   x: z.number().min(0).max(100), 
   y: z.number().min(0).max(100), 

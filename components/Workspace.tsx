@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import { useDraggable } from '@dnd-kit/core';
 import { Type, Hash, Calendar, PenTool, CheckSquare, ChevronLeft, ChevronRight, Download, FileText, Plus, Trash2, Undo, Redo} from 'lucide-react';
 import { usePdfStore } from '../store/usePdfStore'; 
+import { TemplateExportSchema } from '@/lib/schema'; 
 
 // Dynamically import the canvas to avoid SSR Node.js errors with react-pdf
 const PdfCanvas = dynamic(() => import('@/components/PdfCanvas'), { ssr: false });
@@ -93,15 +94,23 @@ export default function Workspace({ file, onNewDocument }: { file: File, onNewDo
   }, [selectedVariableId, deleteVariable, setSelectedVariable, undo, redo]);
 
   const handleExport = () => {
-    // Basic export logic matching our earlier API requirements
-    const exportData = { documentName: file.name, variables };
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${file.name.replace('.pdf', '')}-schema.json`;
-    a.click();
-    URL.revokeObjectURL(url);
+    try{
+      const payload = {
+        documentName: file.name,
+        variables: variables,
+      };
+      
+      const validatedData = TemplateExportSchema.parse(payload);
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(validatedData, null, 2));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", `schema_${file.name}.json`);
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    }catch(error: any ){
+    alert("validation Error: Cannot export invalid schema. Check the console for details.")
+    }
   };
 
   return (

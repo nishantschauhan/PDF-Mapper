@@ -121,7 +121,7 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
           autoFocus
           defaultValue={variable.key}
           onChange={(e) => setWidthTracker(e.target.value)}
-          onBlur={(e) => handleSave(e.target.value)} 
+          onBlur= {handleSave}
           onKeyDown={handleKeyDown} 
           className="bg-transparent border-none outline-none text-center text-black"
           style={{ width: `${Math.max(widthTracker.length, 3)}ch` }} 
