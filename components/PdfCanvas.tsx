@@ -4,7 +4,9 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { usePdfStore } from '../store/usePdfStore'; 
 import { VariablePlacement } from '../lib/schema'; 
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
+import { Type, Hash, Calendar, PenTool,CheckSquare, Signature } from 'lucide-react';
+import { FieldAlreadyExistsError } from 'pdf-lib';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -64,8 +66,17 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
     checkbox: 'bg-pink-500/20 border-pink-500 text-pink-300',
   };
 
+  const IconMap: Record<string, React.ElementType> ={
+    text: Type,
+    number: Hash,
+    date: Calendar,
+    Signature: PenTool,
+    checkbox: CheckSquare,
+  }
+
   const themeClasses = colorMap[variable.type] || colorMap.text;
   const selectedClasses = isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0B0D14] shadow-lg' : '';
+  const FieldIcon = IconMap[variable.type] || Type;
 
   return (
     <div
@@ -85,6 +96,9 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
         setIsEditing(true); 
       }}
     >
+
+      {!isEditing && <FieldIcon size={12} className="opacity-80 shrink-0" />}
+
       {isEditing ? (
         <input
           type="text"

@@ -172,6 +172,19 @@ export default function Workspace({ file, onNewDocument }: { file: File, onNewDo
             <Download size={16} /> Export JSON
           </button>
         </div>
+
+        <div className="flex gap-3">
+          <button onClick={() => {
+              reset();
+              onNewDocument();
+          }}
+          className="flex items-center gap-2 text-sm px-4 py-1.5 border border-[#2A2D3A] rounded-lg hover:bg-[#1C1F2E] transition">
+            <Plus size={16} /> New
+          </button>
+          <button onClick={handleExport} className="flex items-center gap-2 text-sm px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition shadow-lg shadow-blue-900/20">
+            <Download size={16} /> Export JSON
+          </button>
+        </div>
       </header>
 
       <div className="flex flex-1 overflow-hidden">
