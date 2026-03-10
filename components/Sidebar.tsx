@@ -1,7 +1,7 @@
 'use client';
 
 import { useDraggable } from '@dnd-kit/core';
-import { usePdfStore } from '../../../store/usePdfStore'; 
+import { usePdfStore } from '../store/usePdfStore'; 
 import { useState } from 'react';
 
 // Draggable item component

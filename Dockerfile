@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 
 FROM base AS deps
 WORKDIR /app
@@ -15,7 +15,7 @@ FROM base AS runner
 WORKDIR /app
 ENV NODE_ENV production
 
-# In-memory data will reset if this container restarts
+
 COPY --from=builder /app/public ./public
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static

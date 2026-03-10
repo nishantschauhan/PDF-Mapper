@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 
-export const VariableTypeEnum = z.enum(['text', 'number', 'date',]);
+export const VariableTypeEnum = z.enum(['text', 'number', 'date','signature', 'checkbox']);
 export type VariableType = z.infer<typeof VariableTypeEnum>;
 
 
@@ -19,7 +19,6 @@ export const VariablePlacementSchema = z.object({
 
 export type VariablePlacement = z.infer<typeof VariablePlacementSchema>;
 
-// Top-level export validation
 export const TemplateExportSchema = z.object({
   documentName: z.string().optional(),
   variables: z.array(VariablePlacementSchema),

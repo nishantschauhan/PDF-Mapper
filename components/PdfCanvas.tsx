@@ -1,0 +1,96 @@
+'use client';
+
+import { Document, Page, pdfjs } from 'react-pdf';
+import { useDroppable, useDraggable } from '@dnd-kit/core';
+import { usePdfStore } from '../store/usePdfStore'; 
+import { VariablePlacement } from '../lib/schema'; 
+
+pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
+
+interface PdfCanvasProps {
+  file: File;
+  currentPage: number;
+  setNumPages: (num: number) => void;
+}
+
+function DraggablePlacedVariable({ variable, isSelected }: { variable: VariablePlacement, isSelected: boolean }) {
+  const { attributes, listeners, setNodeRef, transform } = useDraggable({
+    id: `placed-var-${variable.id}`,
+    data: { type: 'existing-variable', variable },
+  });
+
+  const style = transform ? {
+    transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+    zIndex: 50,
+  } : undefined;
+
+  // Determine color based on field type
+  const colorMap: Record<string, string> = {
+    text: 'bg-blue-500/20 border-blue-500 text-blue-300',
+    number: 'bg-green-500/20 border-green-500 text-green-300',
+    date: 'bg-yellow-500/20 border-yellow-500 text-yellow-300',
+    signature: 'bg-purple-500/20 border-purple-500 text-purple-300',
+    checkbox: 'bg-pink-500/20 border-pink-500 text-pink-300',
+  };
+
+  const themeClasses = colorMap[variable.type] || colorMap.text;
+  const selectedClasses = isSelected ? 'ring-2 ring-white ring-offset-2 ring-offset-[#0B0D14] shadow-lg' : '';
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ left: `${variable.x}%`, top: `${variable.y}%`, ...style }}
+      {...listeners}
+      {...attributes}
+      className={`absolute px-2 py-1 border backdrop-blur-md text-xs font-semibold rounded shadow-sm cursor-grab active:cursor-grabbing transform -translate-x-1/2 -translate-y-1/2 transition-all ${themeClasses} ${selectedClasses}`}
+      onClick={(e) => {
+        // We prevent propagation so the click doesn't bubble up to the canvas (which clears selection)
+        e.stopPropagation(); 
+      }}
+    >
+      {variable.key}
+    </div>
+  );
+}
+
+// 2. Main Canvas Component
+export default function PdfCanvas({ file, currentPage, setNumPages }: PdfCanvasProps) {
+  const { variables, selectedVariableId } = usePdfStore();
+
+  // The droppable area ID incorporates the current page so the drag handler knows where the drop occurred
+  const { setNodeRef, isOver } = useDroppable({
+    id: `pdf-canvas-droppable-page-${currentPage}`,
+  });
+
+  const currentPageVariables = variables.filter((v) => v.page === currentPage);
+
+  return (
+    <div 
+      ref={setNodeRef}
+      className={`relative shadow-2xl transition-all ${isOver ? 'ring-2 ring-blue-500/50' : 'ring-1 ring-[#2A2D3A]'}`}
+      style={{ width: 'fit-content' }}
+    >
+      <Document
+        file={file}
+        onLoadSuccess={({ numPages }) => setNumPages(numPages)}
+        loading={<div className="p-20 text-gray-500 text-sm">Loading PDF Engine...</div>}
+      >
+        <Page 
+          pageNumber={currentPage} 
+          renderTextLayer={false} 
+          renderAnnotationLayer={false}
+          className="bg-white" // Keep PDF paper white even in dark mode
+        />
+      </Document>
+
+      {/* Render the movable variables as an overlay on top of the PDF */}
+      {currentPageVariables.map((variable) => (
+        <DraggablePlacedVariable 
+          key={variable.id} 
+          variable={variable} 
+          isSelected={selectedVariableId === variable.id}
+        />
+      ))}
+    </div>
+  );
+}
