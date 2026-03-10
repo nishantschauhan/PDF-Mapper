@@ -59,11 +59,11 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
   } : { zIndex: isSelected ? 50 : 10 };
 
   const colorMap: Record<string, string> = {
-    text: 'bg-blue-500/20 border-blue-500 text-blue-300',
-    number: 'bg-green-500/20 border-green-500 text-green-300',
-    date: 'bg-yellow-500/20 border-yellow-500 text-yellow-300',
-    signature: 'bg-purple-500/20 border-purple-500 text-purple-300',
-    checkbox: 'bg-pink-500/20 border-pink-500 text-pink-300',
+    text: ' border-black text-black',
+    number: ' border-black text-black',
+    date: ' border-black text-black',
+    signature: 'border-black text-black',
+    checkbox: ' border-black text-black',
   };
 
   const IconMap: Record<string, React.ElementType> ={
@@ -107,7 +107,7 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
           onChange={(e) => setWidthTracker(e.target.value)}
           onBlur={(e) => handleSave(e.target.value)} 
           onKeyDown={handleKeyDown} 
-          className="bg-transparent border-none outline-none text-center text-white"
+          className="bg-transparent border-none outline-none text-center text-black"
           style={{ width: `${Math.max(widthTracker.length, 3)}ch` }} 
         />
       ) : (
