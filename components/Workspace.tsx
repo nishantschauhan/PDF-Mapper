@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useDraggable } from '@dnd-kit/core';
 import { Type, Hash, Calendar, PenTool, CheckSquare, ChevronLeft, ChevronRight, Download, FileText, Plus, Trash2, Undo, Redo} from 'lucide-react';
@@ -60,6 +60,21 @@ export default function Workspace({ file, onNewDocument }: { file: File, onNewDo
     future
   } = usePdfStore();
   const selectedVar = variables.find(v => v.id === selectedVariableId);
+
+  useEffect(() =>{
+    const handleKeyDown = (e: KeyboardEvent) =>{
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement){
+        return;
+      }
+
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedVariableId){
+        deleteVariable(selectedVariableId);
+        setSelectedVariable(null);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedVariableId, deleteVariable, setSelectedVariable]);
 
   const handleExport = () => {
     // Basic export logic matching our earlier API requirements

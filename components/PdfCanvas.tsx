@@ -4,6 +4,7 @@ import { Document, Page, pdfjs } from 'react-pdf';
 import { useDroppable, useDraggable } from '@dnd-kit/core';
 import { usePdfStore } from '../store/usePdfStore'; 
 import { VariablePlacement } from '../lib/schema'; 
+import { useState, useEffect } from 'react';
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -14,17 +15,48 @@ interface PdfCanvasProps {
 }
 
 function DraggablePlacedVariable({ variable, isSelected }: { variable: VariablePlacement, isSelected: boolean }) {
+  const { setSelectedVariable, updateVariable } = usePdfStore();
+  
+ 
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(variable.key);
+
+  
+  useEffect(() => {
+    setEditValue(variable.key);
+  }, [variable.key]);
+
+  
   const { attributes, listeners, setNodeRef, transform } = useDraggable({
     id: `placed-var-${variable.id}`,
     data: { type: 'existing-variable', variable },
+    disabled: isEditing, 
   });
+
+  const handleSave = () => {
+    if (editValue.trim() && editValue !== variable.key) {
+      updateVariable(variable.id, { key: editValue.trim() });
+    } else {
+      setEditValue(variable.key); 
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') handleSave();
+    if (e.key === 'Escape') {
+      setEditValue(variable.key);
+      setIsEditing(false);
+    }
+    
+    e.stopPropagation(); 
+  };
 
   const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-    zIndex: 50,
-  } : undefined;
+    zIndex: isSelected ? 50 : 10,
+  } : { zIndex: isSelected ? 50 : 10 };
 
-  // Determine color based on field type
   const colorMap: Record<string, string> = {
     text: 'bg-blue-500/20 border-blue-500 text-blue-300',
     number: 'bg-green-500/20 border-green-500 text-green-300',
@@ -40,15 +72,34 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
     <div
       ref={setNodeRef}
       style={{ left: `${variable.x}%`, top: `${variable.y}%`, ...style }}
-      {...listeners}
+      // Only attach drag listeners if we are NOT editing
+      {...(!isEditing ? listeners : {})}
       {...attributes}
-      className={`absolute px-2 py-1 border backdrop-blur-md text-xs font-semibold rounded shadow-sm cursor-grab active:cursor-grabbing transform -translate-x-1/2 -translate-y-1/2 transition-all ${themeClasses} ${selectedClasses}`}
+      className={`absolute px-2 py-1 border backdrop-blur-md text-xs font-semibold rounded shadow-sm transform -translate-x-1/2 -translate-y-1/2 transition-all ${themeClasses} ${selectedClasses} ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'}`}
       onClick={(e) => {
-        // We prevent propagation so the click doesn't bubble up to the canvas (which clears selection)
         e.stopPropagation(); 
+        if (!isEditing) setSelectedVariable(variable.id); 
+      }}
+      onDoubleClick={(e) => {
+        e.stopPropagation();
+        setSelectedVariable(variable.id);
+        setIsEditing(true); 
       }}
     >
-      {variable.key}
+      {isEditing ? (
+        <input
+          type="text"
+          autoFocus
+          value={editValue}
+          onChange={(e) => setEditValue(e.target.value)}
+          onBlur={handleSave} 
+          onKeyDown={handleKeyDown} 
+          className="bg-transparent border-none outline-none text-center text-white"
+          style={{ width: `${Math.max(editValue.length, 3)}ch` }} 
+        />
+      ) : (
+        variable.key
+      )}
     </div>
   );
 }
@@ -57,7 +108,7 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
 export default function PdfCanvas({ file, currentPage, setNumPages }: PdfCanvasProps) {
   const { variables, selectedVariableId } = usePdfStore();
 
-  // The droppable area ID incorporates the current page so the drag handler knows where the drop occurred
+  
   const { setNodeRef, isOver } = useDroppable({
     id: `pdf-canvas-droppable-page-${currentPage}`,
   });
@@ -79,7 +130,7 @@ export default function PdfCanvas({ file, currentPage, setNumPages }: PdfCanvasP
           pageNumber={currentPage} 
           renderTextLayer={false} 
           renderAnnotationLayer={false}
-          className="bg-white" // Keep PDF paper white even in dark mode
+          className="bg-white" 
         />
       </Document>
 

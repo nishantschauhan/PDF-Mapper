@@ -63,7 +63,7 @@ export default function AppRouter() {
           x: xPercent,
           y: yPercent,
         });
-        setSelectedVariable(newId);
+        setSelectedVariable(null);
       } 
       else if (activeData?.type === 'existing-variable') {
         updateVariable(activeData.variable.id, {
@@ -71,7 +71,7 @@ export default function AppRouter() {
           y: yPercent,
           page: targetPage,
         });
-        setSelectedVariable(activeData.variable.id);
+        setSelectedVariable(null);
       }
     }
   };
