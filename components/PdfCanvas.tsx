@@ -129,7 +129,8 @@ export default function PdfCanvas({ file, currentPage, setNumPages }: PdfCanvasP
           pageNumber={currentPage} 
           renderTextLayer={false} 
           renderAnnotationLayer={false}
-          className="bg-white" 
+          className="bg-white"
+          width={800} 
         />
       </Document>
 
