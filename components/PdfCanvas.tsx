@@ -71,6 +71,34 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
     e.stopPropagation();
   };
 
+const handleMouseUp = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isSelected) return;
+
+    const el = e.currentTarget;
+    const parent = el.parentElement;
+    if (!parent) return;
+
+ 
+    const newPixelWidth = el.offsetWidth;
+    const newPixelHeight = el.offsetHeight;
+    const parentWidth = parent.offsetWidth;
+    const parentHeight = parent.offsetHeight;
+
+    
+    const newWidthPercent = (newPixelWidth / parentWidth) * 100;
+    const newHeightPercent = (newPixelHeight / parentHeight) * 100;
+
+    const currentWidth = variable.width || 0;
+    const currentHeight = variable.height || 0;
+    
+    if (Math.abs(currentWidth - newWidthPercent) > 0.5 || Math.abs(currentHeight - newHeightPercent) > 0.5) {
+      updateVariable(variable.id, {
+        width: newWidthPercent,
+        height: newHeightPercent
+      });
+    }
+  };
+
   const style = transform ? {
     transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
     zIndex: isSelected ? 50 : 10,
@@ -99,7 +127,15 @@ function DraggablePlacedVariable({ variable, isSelected }: { variable: VariableP
   return (
     <div
       ref={setNodeRef}
-      style={{ left: `${variable.x}%`, top: `${variable.y}%`, ...style }}
+      onMouseUp={handleMouseUp}
+      style={{ left: `${variable.x}%`, top: `${variable.y}%`,
+      width: variable.width ? `${variable.width}%` : 'auto',
+      height: variable.height ? `${variable.height}%` : 'auto',
+      resize: isSelected ? 'both' : 'none',
+      minWidth: '80px',
+      minHeight: '30px',
+      overflow: 'hidden',
+        ...style }}
       {...(!isEditing ? listeners : {})}
       {...attributes}
       className={`absolute flex items-center gap-1.5 px-2 py-1 border backdrop-blur-md text-xs font-semibold rounded shadow-sm transform -translate-x-1/2 -translate-y-1/2 transition-all ${themeClasses} ${selectedClasses} ${isEditing ? 'cursor-text' : 'cursor-grab active:cursor-grabbing'} `}

@@ -7,7 +7,7 @@ export type VariableType = z.infer<typeof VariableTypeSchema>;
 
 export const VariablePlacementSchema = z.object({
   id: z.string(), 
-  key: z.string().min(1, "Variable can be empty"),
+  key: z.string().min(1, "Variable cannot be empty"),
   label: z.string().optional(),
   type: VariableTypeSchema,
   page: z .number().int().positive(),
