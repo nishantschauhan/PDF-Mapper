@@ -7,18 +7,34 @@ interface LandingPageProps {
   onFileUpload: (file: File) => void;
 }
 
+const MAX_FILE_SIZE_MB = 50;
+const MAX_FILE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
 export default function LandingPage({ onFileUpload }: LandingPageProps) {
   const handleDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     const file = e.dataTransfer.files?.[0];
+
+
     if (file && file.type === 'application/pdf') {
+      if (file.size > MAX_FILE_BYTES){
+        alert(`File is too large! Maximum size is ${MAX_FILE_SIZE_MB}MB.`);
+        return;
+      }
       onFileUpload(file);
     }
   }, [onFileUpload]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) onFileUpload(file);
+    if (file) {
+      if (file.size > MAX_FILE_BYTES) {
+        alert(`File is too large! Maximum size is ${MAX_FILE_SIZE_MB}MB.`);
+        e.target.value = ''; 
+        return;
+      }
+      onFileUpload(file);
+    }
   };
 
   return (
