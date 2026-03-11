@@ -36,9 +36,7 @@ export default function LandingPage({ onFileUpload }: LandingPageProps) {
       <div 
         onDragOver={(e) => e.preventDefault()}
         onDrop={handleDrop}
-        className="relative w-full max-w-2xl border-2 border-dashed border-[#2A2D3A] 
-        rounded-2xl bg-[#12141C] hover:bg-[#161923] transition-colors p-16 flex flex-col 
-        items-center justify-center cursor-pointer mb-8 group overflow-hidden"
+        className="relative w-full max-w-2xl border-2 border-dashed border-[#2A2D3A] rounded-2xl bg-[#12141C] hover:bg-[#161923] transition-colors p-16 flex flex-col items-center justify-center cursor-pointer mb-8 group overflow-hidden"
       >
         <Upload className="text-gray-500 mb-4 group-hover:text-blue-400 transition-colors" size={32} />
         <p className="text-lg font-medium mb-2">Drop your PDF here, or click to browse</p>
